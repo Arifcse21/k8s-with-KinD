@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dstats
+  namespace: dstats
+  labels:
+    app: dstats
+spec:
+  replicas: 1  # Changed to 1 since control-plane is single node
+  selector:
+    matchLabels:
+      app: dstats
+  template:
+    metadata:
+      labels:
+        app: dstats
+    spec:
+      hostPID: true
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: dstats
+        image: arifcse21/dstats:latest
+        ports:
+        - containerPort: 2743
+        env:
+        - name: USE_AUTH
+          value: "true"
+        - name: AUTH_USERNAME
+          value: "dstats-on-k8s"
+        - name: AUTH_PASSWORD
+          value: "dstats-on-k8s"
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+          readOnly: false
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
