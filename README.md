@@ -1,2 +1,2 @@
-# k8s-with-KinD
-Learn k8s with KinD(k8s in docker)
+# k8s-with-k3s
+Learn k8s with k3s
