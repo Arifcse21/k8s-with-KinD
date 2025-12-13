@@ -6,7 +6,7 @@ metadata:
   labels:
     app: dstats
 spec:
-  replicas: 1  # Changed to 1 since control-plane is single node
+  replicas: 1
   selector:
     matchLabels:
       app: dstats
@@ -14,19 +14,14 @@ spec:
     metadata:
       labels:
         app: dstats
-    spec:
-      hostPID: true
-      nodeSelector:
-        node-role.kubernetes.io/control-plane: ""
-      tolerations:
-      - key: node-role.kubernetes.io/control-plane
-        operator: Exists
-        effect: NoSchedule
+    spec:     
       containers:
       - name: dstats
         image: arifcse21/dstats:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 2743
+          name: http
         env:
         - name: USE_AUTH
           value: "true"
@@ -40,6 +35,13 @@ spec:
         - name: docker-sock
           mountPath: /var/run/docker.sock
           readOnly: false
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
       volumes:
       - name: docker-sock
         hostPath:
